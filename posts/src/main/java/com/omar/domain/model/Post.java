@@ -1,6 +1,6 @@
 package com.omar.domain.model;
 
-public record Post(Long idPost, String titulo, String cuerpo, Long idAutor) {
+public record Post(Long id, String titulo, String cuerpo, Long idAutor) {
   public boolean isLargePost() {
     return cuerpo != null && cuerpo.length() > 200;
   }
