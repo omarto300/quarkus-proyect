@@ -1,0 +1,8 @@
+quarkus:
+  rest-client:
+    openweathermap:
+      url: https://api.openweathermap.org
+
+openweathermap:
+  units: metric
+  api-key: ${OPENWEATHER_API_KEY}
