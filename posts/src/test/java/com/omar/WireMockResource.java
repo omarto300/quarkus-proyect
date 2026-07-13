@@ -1,9 +1,13 @@
 package com.omar;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.util.Map;
 
 public class WireMockResource implements QuarkusTestResourceLifecycleManager {
@@ -20,15 +24,35 @@ public class WireMockResource implements QuarkusTestResourceLifecycleManager {
             .willReturn(
                 okJson(
                     """
-                    {"id": 1, "userId": 9, "title": "titulo wiremock", "body": "cuerpo corto"}
-                    """)));
+                        {"id": 1, "userId": 9, "title": "titulo wiremock", "body": "cuerpo corto"}
+                        """)));
     server.stubFor(
         get(urlEqualTo("/users/9"))
             .willReturn(
                 okJson(
                     """
-                    {"id": 9, "name": "Leane Fake", "username": "fake", "email": "fake@test.com"}
-                    """)));
+                        {"id": 9, "name": "Leane Fake", "username": "fake", "email": "fake@test.com"}
+                        """)));
+
+    server.stubFor(get(urlEqualTo("/posts/2")).willReturn(
+        okJson("""
+            {"id": 2, "userId": 9, "title": "lento", "body": "zzz"}
+            """)
+            .withFixedDelay(5000)));
+
+
+    server.stubFor(get(urlEqualTo("/posts/3"))
+            .inScenario("Intermitencia")
+        .whenScenarioStateIs(STARTED)
+            .willSetStateTo("OK")
+        .willReturn(serverError()));
+
+    server.stubFor(get(urlEqualTo("/posts/3"))
+        .inScenario("Intermitencia")
+        .whenScenarioStateIs("OK")
+        .willReturn(okJson("""
+            {"id": 3, "userId": 9, "title": "Falla una", "body": "zzz"}
+            """)));
 
     server.stubFor(
         get(urlEqualTo("/posts/9999")).willReturn(aResponse().withStatus(404).withBody("{}")));
@@ -40,5 +64,13 @@ public class WireMockResource implements QuarkusTestResourceLifecycleManager {
     if (server != null) {
       server.stop();
     }
+  }
+
+  @Override
+  public void inject(TestInjector testInjector) {
+    testInjector.injectIntoFields(
+        server,
+        new TestInjector.MatchesType(WireMockServer.class)
+    );
   }
 }
