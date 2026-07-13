@@ -1,4 +1,4 @@
-package com.omar.aplication.service;
+package com.omar.application.service;
 
 import com.omar.domain.exception.PostNotFoundException;
 import com.omar.domain.model.Post;
