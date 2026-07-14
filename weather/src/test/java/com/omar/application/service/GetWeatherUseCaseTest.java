@@ -5,21 +5,20 @@ import static org.mockito.Mockito.when;
 import com.omar.domain.exception.WeatherProviderException;
 import com.omar.domain.model.Coordinates;
 import com.omar.domain.model.Weather;
-import com.omar.domain.port.in.GetWeatherUseCase;
 import com.omar.domain.port.out.WeatherProviderPort;
-import com.omar.infrastructure.adapter.in.rest.dto.WeatherRequestDto;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@QuarkusTest
+@ExtendWith(MockitoExtension.class)
 class GetWeatherUseCaseTest {
 
-  @InjectMock WeatherProviderPort weatherProviderPort;
-  @Inject GetWeatherUseCase getWeather;
+  @Mock WeatherProviderPort weatherProviderPort;
+  @InjectMocks WeatherService weatherService;
 
   @Test
   void shouldEmitWeatherFromProvider() {
@@ -27,7 +26,7 @@ class GetWeatherUseCaseTest {
     var weather = new Weather("Bogota", "clear sky", 20.0, 19.5, 60, 3.0);
     when(weatherProviderPort.fetchWeather(coordinates)).thenReturn(Uni.createFrom().item(weather));
 
-    getWeather.getWeather(coordinates)
+    weatherService.getWeather(coordinates)
         .subscribe().withSubscriber(UniAssertSubscriber.create())
         .awaitItem()
         .assertItem(weather);
@@ -39,7 +38,7 @@ class GetWeatherUseCaseTest {
     when(weatherProviderPort.fetchWeather(coordinates))
         .thenReturn(Uni.createFrom().failure(new WeatherProviderException("external failure", null)));
 
-    getWeather.getWeather(coordinates)
+    weatherService.getWeather(coordinates)
         .subscribe().withSubscriber(UniAssertSubscriber.create())
         .awaitFailure()
         .assertFailedWith(WeatherProviderException.class, "external failure");
