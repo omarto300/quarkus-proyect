@@ -1,0 +1,5 @@
+# application.properties
+quarkus:
+  restClient:
+    jsonplaceholder:
+      url: https://jsonplaceholder.typicode.com

@@ -11,11 +11,20 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 
+/**
+ * PostService clase de servicio para posts.
+ */
 @ApplicationScoped
 public class PostService implements GetPostUseCase, GetPostDetailUseCase {
   private final PostProviderPort postProvider;
   private final AutorProviderPort autorProvider;
 
+  /**
+   * Constructor para injeccion de dependencias del servicio.
+   *
+   * @param postProviderPort puerto para obtencion de posts.
+   * @param autorProviderPort puerto para obtencion de autor.
+   */
   public PostService(PostProviderPort postProviderPort, AutorProviderPort autorProviderPort) {
     this.postProvider = postProviderPort;
     this.autorProvider = autorProviderPort;
