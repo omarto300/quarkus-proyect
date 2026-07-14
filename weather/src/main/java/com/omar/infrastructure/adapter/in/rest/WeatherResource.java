@@ -22,7 +22,7 @@ public class WeatherResource {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Uni<WeatherResponse> getWeather(@Valid WeatherRequestDto request) {
+  public Uni<WeatherResponse> getWeather(@NotNull @Valid WeatherRequestDto request) {
     var coordinates = mapper.toCoordinates(request);
     return weatherUseCase.getWeather(coordinates).map(mapper::toResponse);
   }

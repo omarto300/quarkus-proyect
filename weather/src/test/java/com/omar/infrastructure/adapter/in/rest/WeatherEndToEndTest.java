@@ -98,6 +98,22 @@ class WeatherEndToEndTest {
   }
 
   @Test
+  void shouldReturn400WhenBodyIsMissing() throws Exception {
+    String actual =
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/api/v1/weather")
+            .then()
+            .statusCode(400)
+            .extract()
+            .body()
+            .asString();
+
+    JSONAssert.assertEquals("{\"error\": \"request must not be null\"}", actual, JSONCompareMode.STRICT);
+  }
+
+  @Test
   void shouldReturn502WhenProviderFails() throws Exception {
     wiremock.register(
         get(urlPathEqualTo("/data/2.5/weather"))

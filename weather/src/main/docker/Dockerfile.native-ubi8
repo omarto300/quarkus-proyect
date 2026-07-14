@@ -1,0 +1,40 @@
+##
+# Multi-stage Dockerfile: compila el binario nativo con Mandrel y lo empaqueta
+# en una imagen mínima de Red Hat UBI8.
+#
+# NOTA: El builder es UBI9-based (glibc 2.34). Si el binario falla en UBI8
+# con "version GLIBC_X.XX not found", sustituye el FROM del stage build por
+# una imagen UBI8 con Mandrel (ej. quay.io/quarkus/ubi8-quarkus-mandrel-builder-image).
+#
+# Build:
+#   podman build -f src/main/docker/Dockerfile.native-ubi8 -t weather-native:ubi8 .
+#
+# Run:
+#   podman run -p 8080:8080 -e OPENWEATHER_API_KEY=<key> weather-native:ubi8
+##
+
+## Stage 1 — Native build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+USER root
+RUN microdnf install -y findutils
+USER quarkus
+WORKDIR /code
+COPY --chown=quarkus:quarkus mvnw /code/mvnw
+COPY --chown=quarkus:quarkus .mvn /code/.mvn
+COPY --chown=quarkus:quarkus pom.xml /code/pom.xml
+RUN ./mvnw -B dependency:go-offline -DskipTests -q
+COPY --chown=quarkus:quarkus src /code/src
+RUN ./mvnw package -Dnative -DskipTests
+
+## Stage 2 — Runtime on UBI8-minimal
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
+WORKDIR /work/
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+COPY --from=build --chown=1001:root --chmod=0755 /code/target/*-runner /work/application
+
+EXPOSE 8080
+USER 1001
+
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
