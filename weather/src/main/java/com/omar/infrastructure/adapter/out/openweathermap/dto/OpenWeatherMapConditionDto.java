@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class OwmWeatherDetailDto {
+public class OpenWeatherMapConditionDto {
 
   private String description;
 }

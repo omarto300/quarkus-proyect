@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class OwmMainDto {
+public class OpenWeatherMapMainDto {
 
   private double temp;
 

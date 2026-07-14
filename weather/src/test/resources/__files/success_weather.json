@@ -1,0 +1,6 @@
+{
+  "name": "London",
+  "weather": [{"description": "light rain"}],
+  "main": {"temp": 15.5, "feels_like": 14.2, "humidity": 82},
+  "wind": {"speed": 4.1}
+}

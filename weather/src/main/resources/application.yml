@@ -6,3 +6,14 @@ quarkus:
 openweathermap:
   units: metric
   api-key: ${OPENWEATHER_API_KEY}
+
+"%test":
+  quarkus:
+    wiremock:
+      devservices:
+        port: 9090
+    rest-client:
+      openweathermap:
+        url: http://localhost:9090
+  openweathermap:
+    api-key: test-key

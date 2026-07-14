@@ -20,15 +20,22 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @ApplicationScoped
 public class OpenWeatherAdapter implements WeatherProviderPort {
 
-  @Inject @RestClient OpenWeatherClient openWeatherClient;
+  private final OpenWeatherClient openWeatherClient;
+  private final OpenWeatherMapper openWeatherMapper;
+  private final String apiKey;
+  private final String units;
 
-  @Inject OpenWeatherMapper openWeatherMapper;
-
-  @ConfigProperty(name = "openweathermap.api-key")
-  String apiKey;
-
-  @ConfigProperty(name = "openweathermap.units")
-  String units;
+  @Inject
+  public OpenWeatherAdapter(
+      @RestClient OpenWeatherClient openWeatherClient,
+      OpenWeatherMapper openWeatherMapper,
+      @ConfigProperty(name = "openweathermap.api-key") String apiKey,
+      @ConfigProperty(name = "openweathermap.units") String units) {
+    this.openWeatherClient = openWeatherClient;
+    this.openWeatherMapper = openWeatherMapper;
+    this.apiKey = apiKey;
+    this.units = units;
+  }
 
   @Override
   @Retry(maxRetries = 2, abortOn = CircuitBreakerOpenException.class)
@@ -40,14 +47,13 @@ public class OpenWeatherAdapter implements WeatherProviderPort {
         .getWeather(coordinates.lat(), coordinates.lon(), apiKey, units)
         .map(openWeatherMapper::toDomain)
         .onFailure()
-        .transform(
-            e -> new WeatherProviderException("Error consultando OpenWeatherMap", e));
+        .transform(e -> new WeatherProviderException("Error querying OpenWeatherMap", e));
   }
 
   Uni<Weather> fetchWeatherFallback(Coordinates coordinates) {
     return Uni.createFrom()
         .failure(
             new WeatherServiceUnavailableException(
-                "El servicio de clima no está disponible temporalmente, intenta de nuevo más tarde"));
+                "Weather service is temporarily unavailable, please try again later"));
   }
 }

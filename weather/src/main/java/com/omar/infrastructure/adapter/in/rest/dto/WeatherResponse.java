@@ -1,28 +1,11 @@
 package com.omar.infrastructure.adapter.in.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
 
-@Value
-@Builder
-public class WeatherResponse {
-
-  @JsonProperty("ciudad")
-  private String city;
-
-  @JsonProperty("descripcion")
-  private String description;
-
-  @JsonProperty("temperatura")
-  private double temperature;
-
-  @JsonProperty("sensacionTermica")
-  private double feelsLike;
-
-  @JsonProperty("humedad")
-  private int humidity;
-
-  @JsonProperty("velocidadViento")
-  private double windSpeed;
-}
+public record WeatherResponse(
+    @JsonProperty("ciudad") String city,
+    @JsonProperty("descripcion") String description,
+    @JsonProperty("temperatura") double temperature,
+    @JsonProperty("sensacionTermica") double feelsLike,
+    @JsonProperty("humedad") int humidity,
+    @JsonProperty("velocidadViento") double windSpeed) {}
